@@ -1,0 +1,50 @@
+# Configuration pour le service backend
+services:
+  - type: web
+    name: gazoduc-backend
+    env: node
+    region: frankfurt
+    buildCommand: |
+      cd backend && \
+      npm install && \
+      npm run build
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        value: FAhLpx6ubTWkpaRVLHIKPZRZaOKh+UJnp66cXiQ3sQKVbTBNRrf8Df27AO4y/PpTzb4XHhOYWzePzLaHwiAceQ==
+      - key: JWT_EXPIRES_IN
+        value: 1h
+      - key: DATABASE_URL
+        value: postgresql://postgres:Kennedy0197914922@db.xekcxuigrzxvkiueuorw.supabase.co:5432/postgres?sslmode=require
+      - key: CORS_ORIGIN
+        value: https://gazoduc-frontend.onrender.com
+      - key: SUPABASE_URL
+        value: https://xekcxuigrzxvkiueuorw.supabase.co
+      - key: SUPABASE_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhla2N4dWlncnp4dmtpdWV1b3J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyODU1ODAsImV4cCI6MjA3NTg2MTU4MH0.01hyHEFTda6MfBO7oKOb_WP6Y4Yqz-h-h0o-H9aGvmU
+    healthCheckPath: /api/health
+    autoDeploy: true
+
+  # Configuration pour le service frontend
+  - type: web
+    name: gazoduc-frontend
+    env: static
+    buildCommand: |
+      cd frontend && \
+      npm install && \
+      npm run build
+    staticPublishPath: "./dist"
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: VITE_SUPABASE_URL
+        value: https://xekcxuigrzxvkiueuorw.supabase.co
+      - key: VITE_SUPABASE_ANON_KEY
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inhla2N4dWlncnp4dmtpdWV1b3J3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAyODU1ODAsImV4cCI6MjA3NTg2MTU4MH0.01hyHEFTda6MfBO7oKOb_WP6Y4Yqz-h-h0o-H9aGvmU
+      - key: VITE_API_URL
+        value: https://gazoduc-backend.onrender.com
+    autoDeploy: true

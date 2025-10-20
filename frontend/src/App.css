@@ -1,0 +1,246 @@
+/* Styles de base */
+:root {
+  --primary-color: #6A0DAD;
+  --secondary-color: #4A0D73;
+  --background-color: #f8f9fa;
+  --text-color: #333;
+  --text-light: #6c757d;
+  --border-color: #e9ecef;
+}
+
+/* Réinitialisation des marges et paddings */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Styles de base pour le body */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  line-height: 1.5;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  overflow-x: hidden;
+}
+
+/* Conteneur principal */
+#root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100%;
+}
+
+/* Styles pour les liens */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--secondary-color);
+  text-decoration: none;
+}
+
+/* Boutons */
+button, .btn {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.5;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  color: white;
+}
+
+/* Formulaire */
+input, textarea, select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-color);
+  border-radius: 0.375rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem rgba(106, 13, 173, 0.25);
+}
+
+/* Utilitaires pour le responsive */
+.container {
+  width: 100%;
+  padding-right: 1rem;
+  padding-left: 1rem;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+@media (min-width: 640px) {
+  .container {
+    max-width: 640px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 768px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1024px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container {
+    max-width: 1280px;
+  }
+}
+
+/* Styles pour les écrans mobiles */
+@media (max-width: 767px) {
+  /* Ajustements généraux */
+  body {
+    font-size: 16px;
+  }
+  
+  /* Espacement réduit sur mobile */
+  .p-4 {
+    padding: 1rem;
+  }
+  
+  /* Taille de police plus grande pour une meilleure lisibilité */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  
+  /* Boutons plus grands pour le toucher */
+  button, .btn, input[type="submit"] {
+    padding: 0.75rem 1.25rem;
+    min-height: 48px; /* Taille minimale pour les zones tactiles */
+  }
+  
+  /* Champs de formulaire plus grands */
+  input, textarea, select {
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  
+  /* Masquer les éléments non essentiels sur mobile */
+  .mobile-hidden {
+    display: none !important;
+  }
+  
+  /* Afficher les éléments spécifiques au mobile */
+  .mobile-visible {
+    display: block !important;
+  }
+}
+
+/* Désactiver le zoom sur les champs de formulaire iOS */
+@supports (-webkit-touch-callout: none) {
+  input, textarea, select {
+    font-size: 16px; /* Désactive le zoom automatique sur iOS */
+  }
+}
+
+/* Prévenir le débordement horizontal */
+img, video, canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Améliorer la lisibilité du texte sur mobile */
+p, li, td, th, label, input, textarea, select, button {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Animation de chargement */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  animation: spin 1s linear infinite;
+  border: 3px solid rgba(0, 0, 0, 0.1);
+  border-radius: 50%;
+  border-top-color: var(--primary-color);
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+}
+
+/* Améliorations pour les cartes sur mobile */
+.card {
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+/* Espacement entre les sections sur mobile */
+.section {
+  padding: 1.5rem 0;
+}
+
+/* Ajustements pour les tableaux sur mobile */
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Masquer la barre de défilement sur iOS */
+::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  background: transparent;
+}
+
+/* Correction pour les menus déroulants sur iOS */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 1em;
+  padding-right: 2.5rem;
+}

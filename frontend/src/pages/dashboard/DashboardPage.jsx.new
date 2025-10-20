@@ -1,0 +1,365 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { 
+  FiDollarSign, 
+  FiTrendingUp, 
+  FiPieChart, 
+  FiUsers,
+  FiRefreshCw,
+  FiAlertCircle,
+  FiArrowUpRight,
+  FiArrowDownRight
+} from 'react-icons/fi';
+import { getDashboardStats, getRecentTransactions } from '../../services/dashboardService';
+
+// Composant de chargement
+const LoadingSpinner = () => (
+  <div className="flex justify-center items-center min-h-[300px]">
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+  </div>
+);
+
+// Composant de carte de statistique
+const StatCard = ({ title, value, icon: Icon, color = 'blue', change }) => {
+  const colors = {
+    blue: 'bg-blue-50 text-blue-600',
+    green: 'bg-green-50 text-green-600',
+    purple: 'bg-purple-50 text-purple-600',
+    amber: 'bg-amber-50 text-amber-600'
+  };
+
+  return (
+    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-medium text-gray-500">{title}</p>
+          <p className="mt-1 text-2xl font-semibold text-gray-900">
+            {typeof value === 'number' 
+              ? value.toLocaleString('fr-FR', { 
+                  style: 'currency', 
+                  currency: 'XOF',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }) 
+              : value}
+          </p>
+          {change !== undefined && (
+            <div className={`mt-1 flex items-center text-sm ${
+              change >= 0 ? 'text-green-600' : 'text-red-600'
+            }`}>
+              {change >= 0 ? (
+                <FiArrowUpRight className="mr-1" />
+              ) : (
+                <FiArrowDownRight className="mr-1" />
+              )}
+              {Math.abs(change)}%
+            </div>
+          )}
+        </div>
+        <div className={`p-3 rounded-lg ${colors[color]}`}>
+          <Icon className="w-6 h-6" />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// Composant de transaction
+const TransactionItem = ({ type, amount, date, status }) => {
+  const typeLabels = {
+    deposit: 'Dépôt',
+    withdrawal: 'Retrait',
+    profit: 'Gain',
+    investment: 'Investissement'
+  };
+
+  const statusStyles = {
+    completed: 'bg-green-100 text-green-800',
+    pending: 'bg-yellow-100 text-yellow-800',
+    failed: 'bg-red-100 text-red-800'
+  };
+
+  const isPositive = ['deposit', 'profit'].includes(type);
+  const amountColor = isPositive ? 'text-green-600' : 'text-red-600';
+  const amountSign = isPositive ? '+' : '-';
+
+  return (
+    <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+      <div>
+        <p className="font-medium text-gray-900">{typeLabels[type] || type}</p>
+        <p className="text-sm text-gray-500">
+          {new Date(date).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric'
+          })}
+        </p>
+      </div>
+      <div className="text-right">
+        <p className={`font-medium ${amountColor}`}>
+          {amountSign} {Math.abs(amount).toLocaleString('fr-FR', {
+            style: 'currency',
+            currency: 'XOF',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          })}
+        </p>
+        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+          {status === 'completed' ? 'Terminé' : status === 'pending' ? 'En attente' : 'Échoué'}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+const DashboardPage = () => {
+  const [stats, setStats] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const navigate = useNavigate();
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Chargement en parallèle
+      const [dashboardData, recentTransactions] = await Promise.all([
+        getDashboardStats(),
+        getRecentTransactions(5)
+      ]);
+      
+      setStats(dashboardData);
+      setTransactions(recentTransactions);
+    } catch (err) {
+      console.error('Erreur:', err);
+      setError('Impossible de charger les données du tableau de bord');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-4xl mx-auto p-6">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FiAlertCircle className="h-5 w-5 text-red-500" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+              <button
+                onClick={fetchData}
+                className="mt-2 inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <FiRefreshCw className="mr-1.5 h-3 w-3" />
+                Réessayer
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {/* En-tête */}
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Tableau de bord</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            {new Date().toLocaleDateString('fr-FR', { 
+              weekday: 'long', 
+              year: 'numeric', 
+              month: 'long', 
+              day: 'numeric' 
+            })}
+          </p>
+        </div>
+        <button
+          onClick={fetchData}
+          className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <FiRefreshCw className={`mr-2 h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+          Actualiser
+        </button>
+      </div>
+
+      {/* Cartes de statistiques */}
+      <div className="grid grid-cols-1 gap-5 mt-6 sm:grid-cols-2 lg:grid-cols-4">
+        <StatCard 
+          title="Solde total" 
+          value={stats?.total_balance || 0} 
+          icon={FiDollarSign} 
+          color="blue" 
+        />
+        <StatCard 
+          title="Gains totaux" 
+          value={stats?.total_earnings || 0} 
+          icon={FiTrendingUp} 
+          color="green"
+          change={stats?.monthly_earnings > 0 ? 
+            ((stats.monthly_earnings - (stats.last_month_earnings || 0)) / (stats.last_month_earnings || 1) * 100).toFixed(1) : 0}
+        />
+        <StatCard 
+          title="Investissements actifs" 
+          value={stats?.active_investments || 0} 
+          icon={FiPieChart} 
+          color="purple" 
+        />
+        <StatCard 
+          title="Parrainages" 
+          value={stats?.referral_count || 0} 
+          icon={FiUsers} 
+          color="amber" 
+        />
+      </div>
+
+      {/* Graphique et transactions récentes */}
+      <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Section Graphique */}
+        <div className="lg:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Activité récente</h2>
+          <div className="h-64 flex items-center justify-center bg-gray-50 rounded-lg">
+            <p className="text-gray-500">Graphique des performances à venir</p>
+          </div>
+        </div>
+
+        {/* Dernières transactions */}
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-medium text-gray-900">Dernières transactions</h2>
+            <button 
+              onClick={() => navigate('/transactions')}
+              className="text-sm text-blue-600 hover:text-blue-800"
+            >
+              Voir tout
+            </button>
+          </div>
+          
+          {transactions.length > 0 ? (
+            <div className="space-y-2">
+              {transactions.map((transaction) => (
+                <TransactionItem
+                  key={transaction.id}
+                  type={transaction.type}
+                  amount={transaction.amount}
+                  date={transaction.created_at}
+                  status={transaction.status || 'completed'}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-6 text-gray-500">
+              <p>Aucune transaction récente</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Section d'actions rapides */}
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="font-medium text-gray-900 mb-4">Actions rapides</h3>
+          <div className="space-y-3">
+            <button
+              onClick={() => navigate('/invest')}
+              className="w-full flex items-center justify-between px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <span>Faire un investissement</span>
+              <FiArrowUpRight className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate('/withdraw')}
+              className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <span>Faire un retrait</span>
+              <FiArrowUpRight className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate('/referrals')}
+              className="w-full flex items-center justify-between px-4 py-3 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <span>Parrainer un ami</span>
+              <FiUsers className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* Section des performances */}
+        <div className="md:col-span-2 bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <h3 className="font-medium text-gray-900 mb-4">Performances</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-500">Gains ce mois-ci</p>
+              <p className="text-xl font-semibold text-gray-900">
+                {stats?.monthly_earnings?.toLocaleString('fr-FR', {
+                  style: 'currency',
+                  currency: 'XOF',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }) || '0 FCFA'}
+              </p>
+              <p className="text-sm text-green-600 mt-1">
+                {stats?.last_month_earnings 
+                  ? `${((stats.monthly_earnings - stats.last_month_earnings) / stats.last_month_earnings * 100).toFixed(1)}% par rapport au mois dernier`
+                  : 'Nouveau ce mois-ci'}
+              </p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-500">Dépôts totaux</p>
+              <p className="text-xl font-semibold text-gray-900">
+                {stats?.total_deposits?.toLocaleString('fr-FR', {
+                  style: 'currency',
+                  currency: 'XOF',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }) || '0 FCFA'}
+              </p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-500">Retraits totaux</p>
+              <p className="text-xl font-semibold text-gray-900">
+                {stats?.total_withdrawals?.toLocaleString('fr-FR', {
+                  style: 'currency',
+                  currency: 'XOF',
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 0
+                }) || '0 FCFA'}
+              </p>
+            </div>
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <p className="text-sm text-gray-500">Dernière mise à jour</p>
+              <p className="text-sm font-medium text-gray-900">
+                {new Date(stats?.last_updated || new Date()).toLocaleString('fr-FR', {
+                  day: '2-digit',
+                  month: 'short',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardPage;

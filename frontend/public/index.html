@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta name="theme-color" content="#6A0DAD" />
+    <meta name="description" content="Gazoduc Invest - Plateforme d'investissement innovante dans l'énergie du futur" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Gazoduc Invest" />
+    
+    <!-- Favicons -->
+    <link rel="icon" href="%PUBLIC_URL%/logo.jpg" type="image/jpg" sizes="128x128" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.jpg" sizes="180x180" />
+    <link rel="apple-touch-startup-image" href="%PUBLIC_URL%/splash.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <title>Gazoduc Invest</title>
+    <style>
+      #root {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      
+      #loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #0a0a0a;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        transition: opacity 0.5s ease-out;
+      }
+      
+      .loader-spinner {
+        width: 50px;
+        height: 50px;
+        border: 5px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        border-top-color: #4f46e5;
+        animation: spin 1s ease-in-out infinite;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root">
+      <div style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; display: flex; justify-content: center; align-items: center; background: #0a0a0a; color: white; font-family: Arial, sans-serif; z-index: 9999;" id="loading-message">
+        <div style="text-align: center;">
+          <div class="loader-spinner"></div>
+          <p style="margin-top: 20px; font-size: 18px;">Chargement de l'application...</p>
+        </div>
+      </div>
+    </div>
+    <script>
+      // Script pour masquer le message de chargement une fois l'application chargée
+      window.addEventListener('app-loaded', function() {
+        const loadingMessage = document.getElementById('loading-message');
+        if (loadingMessage) {
+          loadingMessage.style.display = 'none';
+        }
+      });
+    </script>
+  </body>
+</html>

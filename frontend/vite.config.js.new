@@ -1,0 +1,44 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+
+executeCommand('rm -f vite.config.js');
+
+export default defineConfig({
+  root: path.resolve(__dirname, './'),
+  publicDir: path.resolve(__dirname, 'public'),
+  plugins: [react()],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src'),
+    },
+  },
+  server: {
+    port: 3002,
+    open: true,
+    strictPort: true,
+    host: '0.0.0.0',
+    hmr: {
+      host: 'localhost',
+      port: 3002,
+    },
+  },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
+    sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+      },
+    },
+  },
+  css: {
+    postcss: {
+      plugins: [
+        require('tailwindcss'),
+        require('autoprefixer'),
+      ],
+    },
+  }
+});

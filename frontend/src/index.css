@@ -1,0 +1,357 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom CSS variables */
+:root {
+  --primary: 106 13 173;      /* #6A0DAD */
+  --primary-light: 139 50 216; /* #8B32D8 */
+  --primary-dark: 75 0 130;   /* #4B0082 */
+  --accent: 255 215 0;       /* #FFD700 */
+  --accent-light: 255 228 77; /* #FFE44D */
+  --accent-dark: 255 215 0;   /* #FFD700 */
+}
+
+/* Light theme */
+:root {
+  --background: 255 255 255;  /* #ffffff */
+  --foreground: 26 26 26;     /* #1a1a1a */
+  --muted: 74 74 74;          /* #4a4a4a */
+  --muted-foreground: 113 113 122; /* #71717a */
+  --border: 214.3 31.8% 91.4%; /* #e5e7eb */
+
+  .dark {
+    --border: 217.2 32.6% 17.5%; /* #1e293b */
+  }
+  --border: 229 231 235;      /* #e5e7eb */
+  --card: 255 255 255;        /* #ffffff */
+  --card-foreground: 26 26 26; /* #1a1a1a */
+  --popover: 255 255 255;     /* #ffffff */
+  --popover-foreground: 26 26 26; /* #1a1a1a */
+  --input: 229 231 235;       /* #e5e7eb */
+  --primary-foreground: 255 255 255; /* #ffffff */
+  --secondary: 243 244 246;   /* #f3f4f6 */
+  --secondary-foreground: 17 24 39; /* #111827 */
+  --accent-foreground: 26 26 26; /* #1a1a1a */
+  --destructive: 239 68 68;   /* #ef4444 */
+  --destructive-foreground: 255 255 255; /* #ffffff */
+  --ring: 156 163 175;        /* #9ca3af */
+  --radius: 0.5rem;
+}
+
+/* Dark theme */
+.dark {
+  --background: 26 26 26;     /* #1a1a1a */
+  --foreground: 255 255 255;  /* #ffffff */
+  --muted: 229 231 235;       /* #e5e7eb */
+  --muted-foreground: 161 161 170; /* #a1a1aa */
+  --border: 74 74 74;         /* #4a4a4a */
+  --card: 26 26 26;           /* #1a1a1a */
+  --card-foreground: 255 255 255; /* #ffffff */
+  --popover: 26 26 26;        /* #1a1a1a */
+  --popover-foreground: 255 255 255; /* #ffffff */
+  --input: 74 74 74;          /* #4a4a4a */
+  --primary: 139 50 216;      /* #8B32D8 */
+  --primary-foreground: 255 255 255; /* #ffffff */
+  --secondary: 45 45 45;      /* #2d2d2d */
+  --secondary-foreground: 255 255 255; /* #ffffff */
+  --accent: 255 228 77;       /* #FFE44D */
+  --accent-foreground: 26 26 26; /* #1a1a1a */
+  --destructive: 127 29 29;   /* #7f1d1d */
+  --destructive-foreground: 255 255 255; /* #ffffff */
+  --ring: 63 63 70;           /* #3f3f46 */
+}
+
+/* Base styles */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display font-bold tracking-tight;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl lg:text-6xl;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+  
+  p {
+    @apply text-muted-foreground leading-relaxed;
+  }
+}
+
+/* Custom components */
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:opacity-90;
+  }
+  
+  .btn-secondary {
+    @apply bg-secondary text-white hover:opacity-80;
+  }
+  
+  .input {
+    @apply flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  
+  .card {
+    @apply rounded-lg border bg-card text-card-foreground shadow-sm;
+  }
+}
+
+/* Styles de base */
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Transition de thème fluide */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.2s ease;
+}
+
+/* Styles pour les titres */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 1rem 0;
+}
+
+/* Styles pour les liens */
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--color-primary-light);
+  text-decoration: underline;
+}
+
+/* Classes utilitaires */
+.bg-primary {
+  background-color: var(--color-primary);
+}
+
+.bg-secondary {
+  background-color: var(--color-bg-secondary);
+}
+
+.text-primary {
+  color: var(--color-text-primary);
+}
+
+.text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.border-primary {
+  border-color: var(--color-primary);
+}
+
+.border-secondary {
+  border-color: var(--color-border);
+}
+
+/* Styles pour la sélection de texte */
+::selection {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+/* Barre de défilement personnalisée */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-secondary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-primary-hover);
+}
+
+/* Animation de chargement */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader {
+  border-top-color: var(--color-primary);
+  animation: spin 1s ease-in-out infinite;
+}
+
+/* Animation de transition de thème */
+.theme-transition {
+  animation: theme-transition 0.3s ease-in-out;
+}
+
+@keyframes theme-transition {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Styles pour les boutons */
+.btn {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-light);
+}
+
+.btn-secondary {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-bg-secondary);
+  opacity: 0.9;
+}
+
+/* Styles pour les cartes */
+.card {
+  background-color: var(--color-bg);
+  border-radius: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+/* Styles pour les champs de formulaire */
+.input {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--color-border);
+  background-color: var(--color-bg);
+  transition: all 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(106, 13, 173, 0.2);
+}
+
+/* Styles pour les titres */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0 0 1rem 0;
+}
+
+h1 { 
+  font-size: 2.5rem;
+  line-height: 3rem;
+}
+
+h2 { 
+  font-size: 2rem;
+  line-height: 2.5rem;
+}
+
+h3 { 
+  font-size: 1.75rem;
+  line-height: 2.25rem;
+}
+
+h4 { 
+  font-size: 1.5rem;
+  line-height: 2rem;
+}
+
+h5 { 
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+}
+
+h6 { 
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+h5 { 
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+}
+
+h6 { 
+  font-size: 1rem;
+  line-height: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  h5 {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  h6 {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+}

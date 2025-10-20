@@ -1,0 +1,61 @@
+{
+  "short_name": "Gazoduc Invest",
+  "name": "Gazoduc Invest - Plateforme d'investissement",
+  "description": "Investissez dans l'énergie du futur avec Gazoduc Invest",
+  "icons": [
+    {
+      "src": "logo-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "start_url": ".",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#6A0DAD",
+  "background_color": "#121212",
+  "prefer_related_applications": false,
+  "categories": ["finance", "business", "investment"],
+  "screenshots": [
+    {
+      "src": "screenshot1.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "screenshot2.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Tableau de bord",
+      "short_name": "Tableau de bord",
+      "description": "Accédez à votre tableau de bord personnel",
+      "url": "/dashboard"
+    },
+    {
+      "name": "Investir",
+      "short_name": "Investir",
+      "description": "Découvrez les opportunités d'investissement",
+      "url": "/invest"
+    }
+  ]
+}

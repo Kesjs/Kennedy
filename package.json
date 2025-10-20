@@ -1,0 +1,27 @@
+{
+  "name": "gazoduc-invest",
+  "version": "1.0.0",
+  "description": "Gazoduc Invest - Plateforme d'investissement",
+  "private": true,
+  "scripts": {
+    "start": "cd backend && node server.js",
+    "dev": "concurrently \"cd frontend && npm run dev\" \"cd backend && npm run dev\"",
+    "install:all": "npm install && cd frontend && npm install && cd ../backend && npm install",
+    "build": "cd frontend && npm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=7.0.0"
+  },
+  "dependencies": {
+    "concurrently": "^8.0.1"
+  },
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "keywords": ["investissement", "gazoduc", "finance"],
+  "author": "Votre Nom",
+  "license": "ISC"
+}
