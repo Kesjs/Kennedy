@@ -3,7 +3,7 @@ import { toast } from 'react-hot-toast';
 
 // Create axios instance
 const api = axios.create({
-  baseURL: 'http://localhost:5001/api', // URL directe vers le backend
+  baseURL: 'http://localhost:5001', // Base URL sans le /api à la fin
   headers: {
     'Content-Type': 'application/json',
   },
@@ -42,9 +42,23 @@ api.interceptors.response.use(
       return Promise.reject({ ...error, isAuthError: true });
     }
     
+    // Gestion des erreurs de dépôt initial
+    if (response?.status === 403 && response?.data?.code === 'INITIAL_DEPOSIT_REQUIRED') {
+      console.log('[API] Dépôt initial requis - Géré par le composant');
+      // On laisse le composant gérer l'affichage
+      return Promise.reject({ 
+        ...error, 
+        isInitialDepositRequired: true,
+        message: 'Un dépôt initial est requis pour accéder à cette fonctionnalité'
+      });
+    }
+    
     // Handle server errors
     if (response?.data?.message) {
-      toast.error(response.data.message);
+      // Ne pas afficher de toast pour les erreurs de dépôt initial (déjà géré ci-dessus)
+      if (response?.data?.code !== 'INITIAL_DEPOSIT_REQUIRED') {
+        toast.error(response.data.message);
+      }
     } else if (error.message === 'Network Error') {
       toast.error('Erreur de connexion au serveur');
     } else {

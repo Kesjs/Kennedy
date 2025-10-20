@@ -87,7 +87,7 @@ export { default as RegisterPage } from './pages/auth/RegisterPage';
 export { default as VerifyEmailPage } from './pages/auth/VerifyEmailPage';
 export { default as ForgotPasswordPage } from './pages/auth/ForgotPasswordPage';
 export { default as ResetPasswordPage } from './pages/auth/ResetPasswordPage';
-export { default as DepositPage } from './pages/transactions/DepositPage';
+export { default as DepositPage } from './pages/deposit/NewDepositPage';
 export { default as WithdrawPage } from './pages/transactions/WithdrawPage';
 export { default as DashboardPage } from './pages/dashboard/DashboardPage';
 export { default as ProfilePage } from './pages/profile/ProfilePage';

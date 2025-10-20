@@ -13,7 +13,7 @@ const DashboardPage = lazy(() => import('../pages/dashboard/DashboardPage'));
 const InvestmentPage = lazy(() => import('../pages/investment/InvestmentPage'));
 const NewInvestmentPage = lazy(() => import('../pages/investment/NewInvestmentPage'));
 const MyInvestmentsPage = lazy(() => import('../pages/investment/MyInvestmentsPage'));
-const DepositPage = lazy(() => import('../pages/transactions/DepositPage'));
+const DepositPage = lazy(() => import('../pages/deposit/NewDepositPage'));
 const WithdrawPage = lazy(() => import('../pages/transactions/WithdrawPage'));
 const SettingsPage = lazy(() => import('../pages/settings/SettingsPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));

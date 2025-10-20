@@ -4,6 +4,7 @@ const { param, query, body } = require('express-validator');
 const { validate } = require('../middleware/validation.middleware');
 const { authenticate } = require('../middleware/auth.middleware');
 const transactionController = require('../controllers/transaction.controller');
+const { requireInitialDeposit } = require('../middleware/requireInitialDeposit.middleware');
 
 // Middleware d'authentification pour toutes les routes
 router.use(authenticate);
@@ -41,6 +42,30 @@ router.get(
   ],
   validate,
   transactionController.getTransactionDetails
+);
+
+// Effectuer un dépôt
+router.post(
+  '/deposit',
+  [
+    body('amount')
+      .isFloat({ min: 1 })
+      .withMessage('Le montant doit être un nombre positif'),
+    body('currency')
+      .optional()
+      .isString()
+      .isIn(['EUR', 'USD', 'BTC', 'ETH', 'USDT'])
+      .withMessage('Devise non prise en charge'),
+    body('paymentMethod')
+      .isIn(['bank_transfer', 'credit_card', 'crypto'])
+      .withMessage('Méthode de paiement non valide'),
+    body('isInitialDeposit')
+      .optional()
+      .isBoolean()
+      .withMessage('Le statut de dépôt initial doit être un booléen')
+  ],
+  validate,
+  transactionController.processDeposit
 );
 
 // Créer une demande de retrait

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiDollarSign, FiTrendingUp, FiPieChart, FiUsers, FiRefreshCw, FiAlertCircle, FiArrowUpRight, FiArrowDownRight, FiAlertTriangle, FiPlus, FiMinus, FiArrowRight, FiDownload, FiUpload, FiCreditCard } from 'react-icons/fi';
+import { FiDollarSign, FiTrendingUp, FiPieChart, FiUsers, FiRefreshCw, FiAlertCircle, FiArrowUpRight, FiArrowDownRight, FiAlertTriangle, FiPlus, FiMinus, FiArrowRight, FiDownload, FiUpload, FiCreditCard, FiInfo } from 'react-icons/fi';
 import dashboardService from '../../services/api/dashboardService';
 import { formatCurrency } from '../../utils/format';
 import NavigationTest from '../../components/debug/NavigationTest';
@@ -261,30 +261,42 @@ const DashboardPage = () => {
       try {
         // Chargement en parallèle
         const [dashboardData, recentTransactions] = await Promise.all([
-          dashboardService.getDashboardStats(),
-          dashboardService.getRecentTransactions(5)
+          dashboardService.getDashboardStats()
+            .catch(err => {
+              if (err.isInitialDepositRequired) {
+                console.log('[Dashboard] Dépôt initial requis');
+                setIsNewUser(true);
+                return null;
+              }
+              console.error('[Dashboard] Erreur lors de la récupération des statistiques:', err);
+              throw err;
+            }),
+          dashboardService.getRecentTransactions(5).catch(() => [])
         ]);
 
-        // Toujours utiliser les valeurs par défaut
-        console.log('[Dashboard] Utilisation des valeurs par défaut pour tous les utilisateurs');
-        setStats({
-          ...initialStats,
-          lastUpdated: new Date().toISOString()
-        });
-        setTransactions([]);
-        setIsNewUser(true);
-        
-        // Log des données reçues à des fins de débogage
-        console.log('[Dashboard] Données reçues du serveur (ignorées):', {
-          dashboardData,
-          hasTransactions: recentTransactions && recentTransactions.length > 0
-        });
+        // Si on a des données valides du serveur
+        if (dashboardData && dashboardData.success !== false) {
+          setStats({
+            ...initialStats,
+            ...dashboardData,
+            lastUpdated: new Date().toISOString()
+          });
+          setIsNewUser(false);
+        } else {
+          // Utiliser les valeurs par défaut pour un nouvel utilisateur
+          setStats({
+            ...initialStats,
+            lastUpdated: new Date().toISOString()
+          });
+          setIsNewUser(true);
+        }
         
         setTransactions(recentTransactions || []);
+        
       } catch (err) {
         console.error('[Dashboard] Erreur lors du chargement des données:', err);
         
-        // Si c'est une erreur d'authentification
+        // En cas d'erreur d'authentification, rediriger vers la page de connexion
         if (err.isAuthError) {
           console.log('[Dashboard] Erreur d\'authentification, déconnexion...');
           localStorage.removeItem('token');
@@ -292,11 +304,14 @@ const DashboardPage = () => {
           return;
         }
         
-        // Pour les autres erreurs, on affiche un message
-        setError({
-          message: 'Impossible de charger les données du tableau de bord',
-          details: process.env.NODE_ENV === 'development' ? err.message : null
+        // Pour les autres erreurs, on utilise les valeurs par défaut
+        console.log('[Dashboard] Utilisation des valeurs par défaut suite à une erreur');
+        setStats({
+          ...initialStats,
+          lastUpdated: new Date().toISOString()
         });
+        setTransactions([]);
+        setIsNewUser(true);
       }
     } finally {
       setLoading(false);
@@ -314,27 +329,6 @@ const DashboardPage = () => {
     setRefreshing(true);
     fetchData();
   };
-
-  // Écran de chargement
-  if (loading) {
-    return (
-      <div className="w-full p-6">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Tableau de bord</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-400">Chargement en cours...</p>
-          </div>
-          <button className="btn btn-ghost btn-sm" disabled>
-            <FiRefreshCw className="animate-spin mr-2" />
-            Chargement...
-          </button>
-        </div>
-        <div className="flex items-center justify-center min-h-[300px]">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
 
   // Gestion des erreurs
   if (error) {
@@ -364,45 +358,108 @@ const DashboardPage = () => {
 
   // Affichage principal du tableau de bord
   
-  // Si c'est un nouvel utilisateur, afficher un message de bienvenue
+  // Afficher un message de bienvenue pour les nouveaux utilisateurs
   if (isNewUser && !loading && !error) {
     return (
-      <div className="w-full p-4 max-w-7xl mx-auto">
-        <div className="glass-effect backdrop-blur-lg bg-black/30 border border-white/10 rounded-2xl shadow-xl p-8 text-center">
-          <div className="mx-auto w-24 h-24 bg-gradient-to-br from-purple-600/20 to-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center mb-6 border border-white/10">
-            <FiTrendingUp className="w-12 h-12 text-purple-400" />
-          </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-200 to-blue-200 bg-clip-text text-transparent mb-4">Bienvenue sur votre tableau de bord !</h2>
-          <p className="text-gray-300 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
-            Commencez votre parcours d'investissement en effectuant votre premier dépôt. 
-            Une fois votre compte approvisionné, vous pourrez commencer à investir et voir vos performances ici.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button 
-              onClick={() => navigate('/deposit', { state: { from: 'dashboard' } })}
-              className="relative overflow-hidden group px-8 py-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-medium text-base flex items-center justify-center hover:shadow-lg hover:shadow-purple-500/30 transition-all duration-300 transform hover:-translate-y-0.5"
-            >
-              <span className="relative z-10 flex items-center">
-                <FiPlus className="mr-2" /> Faire un premier dépôt
-              </span>
-              <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-            </button>
-            <button 
-              onClick={() => navigate('/invest')}
-              className="relative overflow-hidden group px-8 py-4 bg-transparent text-white border-2 border-purple-600/50 rounded-xl font-medium text-base flex items-center justify-center hover:border-purple-400/70 hover:bg-purple-600/20 transition-all duration-300 transform hover:-translate-y-0.5"
-            >
-              <span className="relative z-10 flex items-center">
-                <FiTrendingUp className="mr-2" /> Découvrir nos investissements
-              </span>
-            </button>
+      <div className="w-full p-4 max-w-4xl mx-auto">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl overflow-hidden">
+          <div className="p-8 md:p-12">
+            <div className="flex flex-col md:flex-row items-center">
+              <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
+                <div className="w-32 h-32 mx-auto md:mx-0 bg-gradient-to-br from-purple-600/20 to-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/10 mb-6">
+                  <FiTrendingUp className="w-16 h-16 text-purple-400" />
+                </div>
+                <button
+                  onClick={() => navigate('/invest')}
+                  className="px-6 py-3 bg-white/10 text-white rounded-lg font-medium text-sm flex items-center justify-center border border-white/20 hover:bg-white/20 transition-colors">
+                  <FiInfo className="mr-2" /> En savoir plus
+                </button>
+              </div>
+              <div className="md:w-1/2 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <h3 className="text-lg font-semibold text-white mb-4">Comment commencer ?</h3>
+                <div className="space-y-4">
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 mr-3 mt-0.5">
+                      <span className="font-bold">1</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-white">Effectuez un dépôt</h4>
+                      <p className="text-sm text-gray-300">Créez votre premier portefeuille en ajoutant des fonds.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 mr-3 mt-0.5">
+                      <span className="font-bold">2</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-white">Choisissez un investissement</h4>
+                      <p className="text-sm text-gray-300">Sélectionnez parmi nos options d'investissement.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 mr-3 mt-0.5">
+                      <span className="font-bold">3</span>
+                    </div>
+                    <div>
+                      <h4 className="font-medium text-white">Suivez vos performances</h4>
+                      <p className="text-sm text-gray-300">Visualisez la croissance de votre portefeuille.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="md:w-1/2 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+              <h3 className="text-lg font-semibold text-white mb-4">Comment commencer ?</h3>
+              <div className="space-y-4">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 mr-3 mt-0.5">
+                    <span className="font-bold">1</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-white">Effectuez un dépôt</h4>
+                    <p className="text-sm text-gray-300">Créez votre premier portefeuille en ajoutant des fonds.</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 mr-3 mt-0.5">
+                    <span className="font-bold">2</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-white">Choisissez un investissement</h4>
+                    <p className="text-sm text-gray-300">Sélectionnez parmi nos options d'investissement.</p>
+                  </div>
+                </div>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 mr-3 mt-0.5">
+                    <span className="font-bold">3</span>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-white">Suivez vos performances</h4>
+                    <p className="text-sm text-gray-300">Visualisez la croissance de votre portefeuille.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  // Si chargement en cours
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-300">Chargement de votre tableau de bord...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-700/30 text-gray-800 dark:text-gray-100 p-4 md:p-6 lg:p-8 transition-colors duration-200">
+    <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 md:p-6 lg:p-8 transition-colors duration-200">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Composant de test de navigation */}
         <NavigationTest />
@@ -420,14 +477,12 @@ const DashboardPage = () => {
           <div className="flex items-center space-x-3">
             <button 
               onClick={() => navigate('/deposit', { state: { from: 'dashboard-header' } })}
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-all flex items-center hover:shadow-lg hover:shadow-blue-500/20"
-            >
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-500 text-white text-sm font-medium rounded-lg hover:opacity-90 transition-all flex items-center hover:shadow-lg hover:shadow-blue-500/20">
               <FiPlus className="mr-1.5" /> Dépôt
             </button>
             <button 
               onClick={() => navigate('/dashboard/withdraw')}
-              className="px-4 py-2 bg-gray-800/50 text-gray-200 text-sm font-medium rounded-lg border border-gray-700 hover:bg-gray-700/50 hover:border-gray-600 transition-all flex items-center hover:shadow-lg hover:shadow-gray-900/10"
-            >
+              className="px-4 py-2 bg-gray-800/50 text-gray-200 text-sm font-medium rounded-lg border border-gray-700 hover:bg-gray-700/50 hover:border-gray-600 transition-all flex items-center hover:shadow-lg hover:shadow-gray-900/10">
               <FiMinus className="mr-1.5" /> Retrait
             </button>
           </div>
@@ -480,15 +535,13 @@ const DashboardPage = () => {
               <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3 mt-4 sm:mt-0">
                 <button 
                   onClick={() => navigate('/deposit', { state: { from: 'wallet-section' } })}
-                  className="btn btn-primary w-full sm:w-auto px-6 h-11 flex items-center justify-center gap-2 rounded-lg"
-                >
+                  className="btn btn-primary w-full sm:w-auto px-6 h-11 flex items-center justify-center gap-2 rounded-lg">
                   <FiPlus className="w-4 h-4" />
                   <span>Déposer</span>
                 </button>
                 <button 
                   onClick={() => navigate('/dashboard/withdraw')}
-                  className="btn bg-white text-gray-700 hover:bg-gray-50 w-full sm:w-auto px-6 h-11 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors"
-                >
+                  className="btn bg-white text-gray-700 hover:bg-gray-50 w-full sm:w-auto px-6 h-11 flex items-center justify-center gap-2 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 dark:hover:bg-gray-600 rounded-lg transition-colors">
                   <FiMinus className="w-4 h-4" />
                   <span>Retirer</span>
                 </button>
@@ -530,55 +583,48 @@ const DashboardPage = () => {
             change={stats?.roiChange}
           />
         </div>
-
-        {/* Dernières transactions et graphique */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 max-w-7xl mx-auto">
-          <div className="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-            <div className="p-6">
-              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
-                <div className="space-y-1">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Dernières transactions</h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Vos transactions les plus récentes
-                  </p>
-                </div>
-                <button
-                  onClick={() => navigate('/transactions')}
-                  className="btn btn-ghost btn-sm h-9 px-3 text-primary hover:bg-primary/10 mt-2 sm:mt-0"
-                >
-                  <span>Voir tout</span>
-                  <FiArrowRight className="ml-1.5 h-4 w-4" />
-                </button>
-              </div>
-              
-              {transactions.length > 0 ? (
-                <div className="space-y-3">
-                  {transactions.map((transaction) => (
-                    <TransactionItem
-                      key={transaction.id}
-                      type={transaction.type}
-                      amount={transaction.amount}
-                      date={transaction.created_at}
-                      status={transaction.status || 'completed'}
-                    />
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
-                  <p>Aucune transaction récente</p>
-                </div>
-              )}
-            </div>
+        
+        {/* Transactions récentes */}
+        <div className="mt-8">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Transactions récentes</h2>
+            <button 
+              onClick={() => navigate('/transactions')}
+              className="text-sm font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 flex items-center"
+            >
+              Voir tout <FiArrowRight className="ml-1 w-4 h-4" />
+            </button>
           </div>
           
-          {/* Graphique de performance */}
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Performance</h3>
-            <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-              <p className="text-gray-500 dark:text-gray-400 text-sm">Graphique de performance à venir</p>
-            </div>
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
+            {transactions && transactions.length > 0 ? (
+              <div>
+                {transactions.map((transaction, index) => (
+                  <TransactionItem
+                    key={index}
+                    type={transaction.type}
+                    amount={transaction.amount}
+                    date={transaction.date}
+                    status={transaction.status}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                <p>Aucune transaction récente</p>
+              </div>
+            )}
           </div>
         </div>
+        
+        {/* Graphique de performance */}
+        <div className="mt-8 bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Performance</h3>
+          <div className="h-64 flex items-center justify-center bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+            <p className="text-gray-500 dark:text-gray-400 text-sm">Graphique de performance à venir</p>
+          </div>
+        </div>
+        
 
         {/* Section d'actions rapides et performances */}
         <div className="mt-8 grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
@@ -602,8 +648,7 @@ const DashboardPage = () => {
                 
                 <button
                   onClick={() => navigate('/withdraw')}
-                  className="w-full flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors"
-                >
+                  className="w-full flex items-center justify-between p-4 rounded-lg bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-green-100 dark:bg-green-800/50">
                       <FiUpload className="w-5 h-5" />
@@ -615,8 +660,7 @@ const DashboardPage = () => {
                 
                 <button
                   onClick={() => navigate('/referrals')}
-                  className="w-full flex items-center justify-between p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors"
-                >
+                  className="w-full flex items-center justify-between p-4 rounded-lg bg-purple-50 dark:bg-purple-900/20 hover:bg-purple-100 dark:hover:bg-purple-900/30 transition-colors">
                   <div className="flex items-center gap-3">
                     <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-800/50">
                       <FiUsers className="w-5 h-5" />
@@ -657,7 +701,7 @@ const DashboardPage = () => {
                       ) : (
                         <FiArrowDownRight className="mr-1 w-4 h-4" />
                       )}
-                      {Math.abs(((stats.monthly_earnings - stats.last_month_earnings) / stats.last_month_earnings * 100)).toFixed(1)}% vs mois dernier
+                      {Math.abs((stats.monthly_earnings - stats.last_month_earnings) / stats.last_month_earnings * 100).toFixed(1)}% vs mois dernier
                     </p>
                   ) : (
                     <p className="text-sm text-blue-600 dark:text-blue-400">Nouveau ce mois-ci</p>

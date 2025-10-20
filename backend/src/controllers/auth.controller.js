@@ -272,19 +272,32 @@ exports.login = async (req, res, next) => {
     // 9. Journalisation de la connexion réussie
     console.log(`Connexion réussie - ID: ${authData.user.id}, Email: ${trimmedEmail}, IP: ${userIp}`);
 
-    // 10. Envoi de la réponse
-    res.json({
+    // Vérifier si un dépôt initial a été effectué
+    const { data: userSettings } = await supabase
+      .from('user_settings')
+      .select('has_initial_deposit')
+      .eq('user_id', authData.user.id)
+      .single();
+
+    // Inclure le statut du dépôt initial dans la réponse
+    const response = {
       success: true,
       message: 'Connexion réussie',
-      user: userResponse,
+      user: {
+        ...userResponse,
+        hasInitialDeposit: userSettings?.has_initial_deposit || false
+      },
       accessToken,
       refreshToken,
       expiresIn: ACCESS_TOKEN_EXPIRES_IN,
+      requiresInitialDeposit: !userSettings?.has_initial_deposit,
       session: {
         created_at: new Date().toISOString(),
         expires_at: new Date(Date.now() + ACCESS_TOKEN_EXPIRES_IN * 1000).toISOString()
       }
-    });
+    };
+
+    res.json(response);
   } catch (error) {
     console.error('Erreur dans la fonction de connexion:', {
       error: error.message,

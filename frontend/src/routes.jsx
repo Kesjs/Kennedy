@@ -14,7 +14,7 @@ const VerifyEmailPage = lazy(() => import('./pages/auth/VerifyEmailPage'));
 const ForgotPasswordPage = lazy(() => import('./pages/auth/ForgotPasswordPage'));
 const ResetPasswordPage = lazy(() => import('./pages/auth/ResetPasswordPage'));
 const DashboardPage = lazy(() => import('./pages/dashboard/DashboardPage'));
-const DepositPage = lazy(() => import('./pages/transactions/DepositPage'));
+const DepositPage = lazy(() => import('./pages/deposit/NewDepositPage'));
 const WithdrawPage = lazy(() => import('./pages/transactions/WithdrawPage'));
 const WithdrawPageTest = lazy(() => import('./pages/transactions/WithdrawPageTest'));
 const TransactionHistoryPage = lazy(() => import('./pages/transactions/TransactionHistoryPage'));

@@ -1,6 +1,14 @@
 const { createError } = require('http-errors');
 const supabase = require('../config/supabase');
 
+// Adresses de dépôt pour les cryptomonnaies
+const CRYPTO_ADDRESSES = {
+  BTC: 'bc1q0ulp4sauly9sahsq7jswy94ane0ev9ksjtvpzn',
+  USDT: '0x63eF5b765D8d408274172804D31fB0a2Ea5416c0',
+  ETH: '0x63eF5b765D8d408274172804D31fB0a2Ea5416c0', // Même adresse que USDT (ERC-20)
+  // Ajoutez d'autres paires de devises/adresses au besoin
+};
+
 // Obtenir l'historique des transactions
 exports.getTransactionHistory = async (req, res, next) => {
   try {
@@ -135,6 +143,123 @@ exports.createWithdrawalRequest = async (req, res, next) => {
       message: 'Withdrawal request created successfully',
       data: transaction
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// Traiter un dépôt
+exports.processDeposit = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const { amount, currency = 'EUR', paymentMethod, isInitialDeposit = false } = req.body;
+
+    // Validation du montant
+    const minDeposit = isInitialDeposit ? 50 : 10; // 50€ minimum pour le dépôt initial, 10€ sinon
+    if (amount < minDeposit) {
+      throw createError(400, `Le montant minimum pour un dépôt est de ${minDeposit} ${currency}`);
+    }
+
+    // Vérifier si c'est un dépôt initial et s'il a déjà été effectué
+    if (isInitialDeposit) {
+      const { data: settings, error: settingsError } = await supabase
+        .from('user_settings')
+        .select('has_initial_deposit')
+        .eq('user_id', userId)
+        .single();
+
+      if (settingsError) throw settingsError;
+      if (settings?.has_initial_deposit) {
+        throw createError(400, 'Un dépôt initial a déjà été effectué pour ce compte');
+      }
+    }
+
+    // Vérifier si la méthode de paiement est valide
+    const validPaymentMethods = ['bank_transfer', 'credit_card', 'crypto'];
+    if (!validPaymentMethods.includes(paymentMethod)) {
+      throw createError(400, 'Méthode de paiement non valide');
+    }
+
+    // Si c'est un dépôt en crypto, vérifier que la devise est prise en charge
+    if (paymentMethod === 'crypto' && !CRYPTO_ADDRESSES[currency]) {
+      throw createError(400, `La devise ${currency} n'est pas prise en charge pour les dépôts en crypto`);
+    }
+
+    // Obtenir ou créer le portefeuille de l'utilisateur
+    let { data: wallet, error: walletError } = await supabase
+      .from('wallets')
+      .upsert(
+        { user_id: userId, currency, is_active: true },
+        { onConflict: 'user_id,currency', ignoreDuplicates: false }
+      )
+      .select()
+      .single();
+
+    if (walletError) throw walletError;
+
+    // Créer la transaction de dépôt
+    const { data: transaction, error: transactionError } = await supabase
+      .from('transactions')
+      .insert([
+        {
+          user_id: userId,
+          wallet_id: wallet.id,
+          amount,
+          currency,
+          type: 'deposit',
+          status: paymentMethod === 'crypto' ? 'pending' : 'completed',
+          payment_method: paymentMethod,
+          description: isInitialDeposit ? 'Dépôt initial' : 'Dépôt de fonds',
+          metadata: {
+            is_initial_deposit: isInitialDeposit,
+            crypto_address: paymentMethod === 'crypto' ? CRYPTO_ADDRESSES[currency] : null
+          }
+        }
+      ])
+      .select()
+      .single();
+
+    if (transactionError) throw transactionError;
+
+    // Si ce n'est pas un dépôt en attente, mettre à jour le solde du portefeuille
+    if (paymentMethod !== 'crypto') {
+      const { error: updateError } = await supabase.rpc('update_wallet_balance', {
+        p_wallet_id: wallet.id,
+        p_amount: amount,
+        p_operation: 'add'
+      });
+
+      if (updateError) throw updateError;
+
+      // Mettre à jour le statut de dépôt initial si nécessaire
+      if (isInitialDeposit) {
+        const { error: settingsUpdateError } = await supabase
+          .from('user_settings')
+          .upsert({
+            user_id: userId,
+            has_initial_deposit: true,
+            updated_at: new Date().toISOString()
+          });
+
+        if (settingsUpdateError) throw settingsUpdateError;
+      }
+    }
+
+    // Préparer la réponse
+    const response = {
+      success: true,
+      message: paymentMethod === 'crypto' 
+        ? `Veuillez envoyer ${amount} ${currency} à l'adresse suivante : ${CRYPTO_ADDRESSES[currency]}`
+        : 'Dépôt effectué avec succès',
+      data: {
+        transaction,
+        depositAddress: paymentMethod === 'crypto' ? CRYPTO_ADDRESSES[currency] : null,
+        isInitialDeposit,
+        requiresConfirmation: paymentMethod === 'crypto'
+      }
+    };
+
+    res.status(201).json(response);
   } catch (error) {
     next(error);
   }
