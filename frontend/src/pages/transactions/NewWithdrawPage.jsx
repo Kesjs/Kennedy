@@ -10,13 +10,13 @@ import api from '../../services/api';
 
 // Composant pour les avantages du retrait
 const BenefitItem = ({ icon, title, description }) => (
-  <div className="flex items-start space-x-4 p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+  <div className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-white/5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
     <div className="flex-shrink-0 p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
       {icon}
     </div>
     <div>
-      <h4 className="font-medium text-white">{title}</h4>
-      <p className="text-sm text-gray-400">{description}</p>
+      <h4 className="font-medium text-gray-900 dark:text-white">{title}</h4>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
     </div>
   </div>
 );
@@ -61,22 +61,22 @@ const NewWithdrawPage = () => {
 
   if (authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (!user || !isAuthenticated) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
-        <div className="max-w-md w-full bg-gray-800 p-8 rounded-xl shadow-lg text-center">
+      <div className="min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 p-4">
+        <div className="max-w-md w-full bg-white dark:bg-gray-800 p-8 rounded-xl shadow-lg text-center border border-gray-200 dark:border-gray-700">
           <div className="text-red-500 text-5xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-white mb-2">Erreur d'authentification</h2>
-          <p className="text-gray-300 mb-6">Veuillez vous connecter pour accéder à cette page</p>
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">Erreur d'authentification</h2>
+          <p className="text-gray-600 dark:text-gray-300 mb-6">Veuillez vous connecter pour accéder à cette page</p>
           <button
             onClick={() => navigate('/login', { state: { from: location.pathname } })}
-            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+            className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow hover:shadow-md"
           >
             Se connecter
           </button>
@@ -202,25 +202,24 @@ const NewWithdrawPage = () => {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 text-white p-4 sm:p-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6 lg:p-8 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         {/* En-tête avec bouton retour */}
         <div className="flex items-center mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-full hover:bg-white/10 transition-colors mr-4"
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700/20 transition-colors mr-4 text-gray-800 dark:text-white"
           >
             <FaArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold">Effectuer un retrait</h1>
-            <p className="text-gray-400">Retirez vos fonds en toute sécurité</p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-800 dark:text-white">Effectuer un retrait</h1>
+            <p className="text-gray-600 dark:text-gray-400">Retirez vos fonds en toute sécurité</p>
           </div>
         </div>
 
@@ -231,21 +230,21 @@ const NewWithdrawPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="bg-gray-800/50 backdrop-blur-sm rounded-xl border border-gray-700 overflow-hidden"
+              className="bg-white dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700/50 overflow-hidden shadow-sm"
             >
               <div className="p-6">
                 {/* Solde disponible */}
                 <div className="mb-8">
-                  <h2 className="text-lg font-medium text-gray-300 mb-2">Solde disponible</h2>
-                  <div className="bg-gray-700/50 rounded-lg p-5 border border-gray-600/50">
-                    <p className="text-3xl font-bold text-white">
+                  <h2 className="text-lg font-medium text-gray-700 dark:text-gray-400 mb-2">Solde disponible</h2>
+                  <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 border border-gray-200 dark:border-gray-700/50">
+                    <p className="text-3xl font-bold text-gray-900 dark:text-white">
                       {new Intl.NumberFormat('fr-FR', {
                         style: 'currency',
                         currency: 'EUR',
                       }).format(walletBalance.balance)}
                     </p>
                     {walletBalance.pending > 0 && (
-                      <p className="mt-2 text-sm text-yellow-400">
+                      <p className="mt-2 text-sm text-yellow-600 dark:text-yellow-400">
                         <FaClock className="inline mr-1" />
                         {walletBalance.pending.toFixed(2)} € en attente de retrait
                       </p>
@@ -257,7 +256,7 @@ const NewWithdrawPage = () => {
                 <form onSubmit={handleWithdrawSubmit}>
                   {/* Montant */}
                   <div className="mb-6">
-                    <label htmlFor="amount" className="block text-sm font-medium text-gray-300 mb-2">
+                    <label htmlFor="amount" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Montant du retrait
                     </label>
                     <div className="relative">
@@ -269,7 +268,7 @@ const NewWithdrawPage = () => {
                         id="amount"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
-                        className="w-full pl-10 pr-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+                        className="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
                         placeholder="0.00"
                         step="0.01"
                         min="0"
@@ -284,7 +283,7 @@ const NewWithdrawPage = () => {
                           key={quickAmount}
                           type="button"
                           onClick={() => setAmount(quickAmount.toString())}
-                          className="px-3 py-1.5 text-sm bg-gray-700 hover:bg-gray-600 rounded-md transition-colors"
+                          className="px-3 py-1.5 text-sm bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md transition-colors text-gray-800 dark:text-white"
                         >
                           {quickAmount} €
                         </button>

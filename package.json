@@ -15,9 +15,14 @@
     "npm": ">=7.0.0"
   },
   "dependencies": {
-    "concurrently": "^8.0.1"
+    "concurrently": "^8.0.1",
+    "http-proxy": "^1.18.1"
   },
-  "keywords": ["investissement", "gazoduc", "finance"],
+  "keywords": [
+    "investissement",
+    "gazoduc",
+    "finance"
+  ],
   "author": "Votre Nom",
   "license": "ISC"
 }

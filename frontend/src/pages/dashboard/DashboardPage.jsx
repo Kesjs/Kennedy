@@ -37,7 +37,7 @@ const StepCard = React.memo(({ icon, step, title, description, color, onClick, b
   };
 
   return (
-    <div className={`bg-white/5 rounded-xl p-5 border border-white/5 hover:shadow-lg transition-all h-full flex flex-col ${colors[color].border}`}>
+    <div className={`bg-white dark:bg-gray-800/50 rounded-xl p-5 border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-all h-full flex flex-col ${colors[color].border}`}>
       <div className="flex items-center mb-4">
         <div className={`flex-shrink-0 h-10 w-10 rounded-full ${colors[color].bg} flex items-center justify-center ${colors[color].text} mr-3`}>
           {icon}
@@ -47,7 +47,7 @@ const StepCard = React.memo(({ icon, step, title, description, color, onClick, b
         </span>
       </div>
       <h4 className="text-lg font-semibold text-white mb-2">{title}</h4>
-      <p className="text-sm text-gray-300 mb-4 flex-grow">{description}</p>
+      <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 flex-grow">{description}</p>
       <button 
         onClick={onClick}
         className={`text-sm ${colors[color].button} flex items-center group self-start`}
@@ -221,7 +221,7 @@ const TransactionItem = React.memo(({ type, amount, date, status }) => {
   })() : 'Date inconnue';
 
   return (
-    <div className="flex items-center justify-between p-4 border-b border-white/5 last:border-0 hover:bg-gray-800/50 transition-colors rounded-lg">
+    <div className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-white/5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
       <div className="flex items-center space-x-3">
         <div className={`p-2 rounded-lg ${
           type === 'deposit' 
@@ -407,12 +407,12 @@ const DashboardPage = () => {
   if (isNewUser && !loading && !error) {
     return (
       <div className="w-full p-4">
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 md:p-8 max-w-7xl mx-auto">
+        <div className="bg-white dark:bg-gradient-to-br dark:from-gray-900 dark:to-gray-800 rounded-2xl p-6 md:p-8 max-w-7xl mx-auto shadow-sm border border-gray-100 dark:border-gray-700">
           {/* En-tête */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
             <div className="mb-4 md:mb-0">
-              <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Bienvenue sur Gazoduc Invest</h2>
-              <p className="text-purple-100/80">Commencez à investir en 3 étapes simples</p>
+              <h2 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-1">Bienvenue sur Gazoduc Invest</h2>
+              <p className="text-purple-600 dark:text-purple-300">Commencez à investir en 3 étapes simples</p>
             </div>
             <button 
               onClick={() => navigate('/deposit')}
@@ -486,7 +486,7 @@ const DashboardPage = () => {
   // Si chargement en cours
   if (loading) {
     return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+      <div className="w-full min-h-screen flex items-center justify-center bg-white dark:bg-gray-900 p-4">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-300">Chargement de votre tableau de bord...</p>
@@ -496,8 +496,8 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="w-full min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-100 p-4 md:p-6 lg:p-8 transition-colors duration-200">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white p-4 md:p-6 lg:p-8 transition-colors duration-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* Composant de test de navigation */}
         <NavigationTest />
         

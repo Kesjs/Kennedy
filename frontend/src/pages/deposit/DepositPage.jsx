@@ -11,13 +11,13 @@ import dashboardService from '../../services/api/dashboardService';
 
 // Composant pour les avantages du dépôt
 const BenefitItem = ({ icon, title, description }) => (
-  <div className="flex items-start space-x-4 p-4 bg-white/5 rounded-lg hover:bg-white/10 transition-colors">
+  <div className="flex items-start space-x-4 p-4 bg-gray-50 dark:bg-white/5 rounded-lg hover:bg-gray-100 dark:hover:bg-white/10 transition-colors">
     <div className="flex-shrink-0 p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
       {icon}
     </div>
     <div>
-      <h4 className="font-medium text-white">{title}</h4>
-      <p className="text-sm text-gray-400">{description}</p>
+      <h4 className="font-medium text-gray-900 dark:text-white">{title}</h4>
+      <p className="text-sm text-gray-600 dark:text-gray-400">{description}</p>
     </div>
   </div>
 );
@@ -30,8 +30,8 @@ const Step = ({ number, title, description, isLast = false }) => (
         {number}
       </div>
       <div className="ml-4">
-        <h4 className="text-lg font-medium text-white">{title}</h4>
-        <p className="text-gray-400">{description}</p>
+        <h4 className="text-lg font-medium text-gray-800 dark:text-white">{title}</h4>
+        <p className="text-gray-600 dark:text-gray-400">{description}</p>
       </div>
     </div>
     {!isLast && (
@@ -108,7 +108,7 @@ const DepositPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl border border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto">
         {/* En-tête */}
         <div className="text-center mb-12">
@@ -118,17 +118,17 @@ const DepositPage = () => {
             transition={{ duration: 0.5 }}
             className="inline-block"
           >
-            <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
-              {isInitialDeposit ? 'Dépôt Initial Requis' : 'Effectuer un Dépôt'}
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-3">
+              Effectuez votre premier dépôt
             </h1>
-            <div className="w-20 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 mx-auto rounded-full"></div>
+            <div className="w-20 h-1 bg-gradient-to-r from-indigo-500 to-purple-600 mx-auto rounded-full mb-4"></div>
+            <p className="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
+              {isInitialDeposit 
+                ? 'Effectuez votre premier dépôt pour débloquer toutes les fonctionnalités de votre compte et commencer à investir.'
+                : 'Ajoutez des fonds à votre compte de manière sécurisée pour profiter de nos opportunités d\'investissement.'}
+            </p>
           </motion.div>
           
-          <p className="mt-4 text-lg text-gray-300 max-w-3xl mx-auto">
-            {isInitialDeposit 
-              ? 'Effectuez votre premier dépôt pour débloquer toutes les fonctionnalités de votre compte et commencer à investir.'
-              : 'Ajoutez des fonds à votre compte de manière sécurisée pour profiter de nos opportunités d\'investissement.'}
-          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -138,18 +138,18 @@ const DepositPage = () => {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden border border-gray-700/50"
+              className="bg-white dark:bg-gray-800/50 rounded-xl shadow-md dark:shadow-xl overflow-hidden border border-gray-200 dark:border-gray-700/50"
             >
               <div className="p-6 sm:p-8">
                 {/* En-tête de la carte */}
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-2xl font-bold text-white">Détails du dépôt</h2>
-                    <p className="text-gray-400 text-sm">Remplissez les détails pour effectuer un dépôt</p>
+                    <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Détails du dépôt</h2>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">Remplissez les détails pour effectuer un dépôt</p>
                   </div>
-                  <div className="flex items-center space-x-2 bg-indigo-500/20 px-3 py-1.5 rounded-full">
-                    <FaLock className="text-indigo-400 text-sm" />
-                    <span className="text-xs font-medium text-indigo-200">Sécurisé</span>
+                  <div className="flex items-center space-x-2 bg-indigo-100 dark:bg-indigo-500/20 px-3 py-1.5 rounded-full">
+                    <FaLock className="text-indigo-600 dark:text-indigo-400 text-sm" />
+                    <span className="text-xs font-medium text-indigo-700 dark:text-indigo-200">Sécurisé</span>
                   </div>
                 </div>
 
@@ -162,22 +162,22 @@ const DepositPage = () => {
             </motion.div>
 
             {/* Section d'information sur les frais */}
-            <div className="mt-6 bg-gray-800/30 backdrop-blur-sm rounded-xl p-6 border border-gray-700/50">
-              <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
-                <FaInfoCircle className="text-indigo-400 mr-2" />
+            <div className="mt-6 bg-gray-50 dark:bg-gray-800/30 rounded-xl p-6 border border-gray-200 dark:border-gray-700/50">
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+                <FaInfoCircle className="text-indigo-600 dark:text-indigo-400 mr-2" />
                 Informations importantes
               </h3>
-              <ul className="space-y-3 text-gray-300">
+              <ul className="space-y-3 text-gray-700 dark:text-gray-300">
                 <li className="flex items-start">
-                  <FaCheckCircle className="text-green-400 mt-1 mr-2 flex-shrink-0" />
+                  <FaCheckCircle className="text-green-600 dark:text-green-400 mt-1 mr-2 flex-shrink-0" />
                   <span>Les dépôts sont traités sous 24 heures ouvrées</span>
                 </li>
                 <li className="flex items-start">
-                  <FaCheckCircle className="text-green-400 mt-1 mr-2 flex-shrink-0" />
+                  <FaCheckCircle className="text-green-600 dark:text-green-400 mt-1 mr-2 flex-shrink-0" />
                   <span>Pas de frais pour les dépôts par virement bancaire</span>
                 </li>
                 <li className="flex items-start">
-                  <FaCheckCircle className="text-green-400 mt-1 mr-2 flex-shrink-0" />
+                  <FaCheckCircle className="text-green-600 dark:text-green-400 mt-1 mr-2 flex-shrink-0" />
                   <span>Support client disponible 24/7 pour toute assistance</span>
                 </li>
               </ul>
@@ -191,9 +191,9 @@ const DepositPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700/50"
+              className="bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700/50 shadow-sm dark:shadow-none"
             >
-              <h3 className="text-lg font-semibold text-white mb-4">Comment effectuer un dépôt</h3>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Comment effectuer un dépôt</h3>
               <div className="space-y-0">
                 <Step 
                   number={1}
@@ -246,21 +246,21 @@ const DepositPage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.5 }}
-              className="bg-gray-800/50 backdrop-blur-sm p-6 rounded-xl border border-gray-700/50"
+              className="bg-white dark:bg-gray-800/50 p-6 rounded-xl border border-gray-200 dark:border-gray-700/50 shadow-sm dark:shadow-none"
             >
-              <h3 className="text-lg font-semibold text-white mb-4">Devises supportées</h3>
+              <h3 className="text-lg font-semibold text-gray-800 dark:text-white mb-4">Devises supportées</h3>
               <div className="grid grid-cols-3 gap-4">
-                <div className="flex flex-col items-center p-3 bg-gray-700/50 rounded-lg">
+                <div className="flex flex-col items-center p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
                   <SiBitcoin className="w-8 h-8 text-orange-500 mb-1" />
-                  <span className="text-sm text-gray-300">Bitcoin</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Bitcoin</span>
                 </div>
-                <div className="flex flex-col items-center p-3 bg-gray-700/50 rounded-lg">
-                  <SiEthereum className="w-8 h-8 text-purple-400 mb-1" />
-                  <span className="text-sm text-gray-300">Ethereum</span>
+                <div className="flex flex-col items-center p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+                  <SiEthereum className="w-8 h-8 text-purple-600 dark:text-purple-400 mb-1" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Ethereum</span>
                 </div>
-                <div className="flex flex-col items-center p-3 bg-gray-700/50 rounded-lg">
-                  <BsCurrencyExchange className="w-8 h-8 text-blue-400 mb-1" />
-                  <span className="text-sm text-gray-300">Virements</span>
+                <div className="flex flex-col items-center p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+                  <BsCurrencyExchange className="w-8 h-8 text-blue-600 dark:text-blue-400 mb-1" />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Virements</span>
                 </div>
               </div>
             </motion.div>
