@@ -2,6 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Smooth transitions for theme switching */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Custom scrollbar for dark/light theme */
+:root {
+  --scrollbar-thumb: #c1c1c1;
+  --scrollbar-track: #f1f1f1;
+}
+
+.dark {
+  --scrollbar-thumb: #4a4a4a;
+  --scrollbar-track: #1a1a1a;
+}
+
+/* Webkit (Chrome, Safari, etc.) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
 /* Custom CSS variables */
 :root {
   --primary: 106 13 173;      /* #6A0DAD */
@@ -37,6 +74,11 @@
   --destructive-foreground: 255 255 255; /* #ffffff */
   --ring: 156 163 175;        /* #9ca3af */
   --radius: 0.5rem;
+}
+
+/* Smooth background transition for theme switching */
+body {
+  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-300;
 }
 
 /* Dark theme */

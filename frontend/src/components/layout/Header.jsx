@@ -385,17 +385,23 @@ const Header = ({ onMenuToggle, isMenuOpen, isCollapsed = false }) => {
                   </div>
                 )}
               </div>
-              {/* Bouton de thème */}
+              {/* Bouton de thème amélioré */}
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded-full text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                className="relative p-2 rounded-full text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 ease-in-out group"
                 aria-label={isDarkMode ? 'Passer en mode clair' : 'Passer en mode sombre'}
               >
-                {isDarkMode ? (
-                  <SunIcon className="h-5 w-5" />
-                ) : (
-                  <MoonIcon className="h-5 w-5" />
-                )}
+                <div className="relative w-5 h-5 flex items-center justify-center">
+                  <SunIcon 
+                    className={`w-5 h-5 transition-all duration-300 ease-in-out ${isDarkMode ? 'rotate-0 opacity-100' : 'rotate-90 opacity-0'}`} 
+                    aria-hidden="true"
+                  />
+                  <MoonIcon 
+                    className={`absolute top-0 left-0 w-5 h-5 transition-all duration-300 ease-in-out ${isDarkMode ? 'rotate-90 opacity-0' : 'rotate-0 opacity-100'}`} 
+                    aria-hidden="true"
+                  />
+                </div>
+                <span className="sr-only">{isDarkMode ? 'Passer en mode clair' : 'Passer en mode sombre'}</span>
               </button>
               
               {/* Bouton de notifications */}
