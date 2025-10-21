@@ -17,10 +17,12 @@
   "dependencies": {
     "concurrently": "^8.0.1"
   },
-  "workspaces": [
-    "frontend",
-    "backend"
-  ],
+  "pnpm": {
+    "overrides": {
+      "react": "^18.2.0",
+      "react-dom": "^18.2.0"
+    }
+  },
   "keywords": ["investissement", "gazoduc", "finance"],
   "author": "Votre Nom",
   "license": "ISC"

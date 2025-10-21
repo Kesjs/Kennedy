@@ -5,9 +5,10 @@ services:
     env: node
     region: frankfurt
     buildCommand: |
+      pnpm install --no-frozen-lockfile
       cd backend && \
-      npm install && \
-      npm run build
+      pnpm install && \
+      pnpm run build
     startCommand: node server.js
     envVars:
       - key: NODE_ENV
@@ -34,17 +35,11 @@ services:
     name: gazoduc-frontend
     env: static
     buildCommand: |
-      # Installer les dépendances et builder le frontend
+      pnpm install --no-frozen-lockfile
       cd frontend
-      npm install
-      npm run build
-      
-      # Créer le répertoire de sortie attendu
-      mkdir -p /opt/render/project/src/dist
-      
-      # Copier les fichiers construits
-      cp -r dist/* /opt/render/project/src/dist/
-    staticPublishPath: "/opt/render/project/src/dist"
+      pnpm install
+      pnpm run build
+    staticPublishPath: "frontend/dist"
     envVars:
       - key: NODE_ENV
         value: production
