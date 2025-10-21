@@ -38,12 +38,12 @@ const navigation = [
   },
   { 
     name: 'Portefeuille', 
-    href: '/deposit', 
+    href: '/dashboard/deposit', 
     icon: WalletIcon,
     children: [
-      { name: 'Dépôt', href: '/deposit' },
-      { name: 'Retrait', href: '/withdraw' },
-      { name: 'Historique', href: '/deposit' },
+      { name: 'Dépôt', href: '/dashboard/deposit' },
+      { name: 'Retrait', href: '/dashboard/withdraw' },
+      { name: 'Historique', href: '/dashboard/transactions' },
     ]
   },
   { 

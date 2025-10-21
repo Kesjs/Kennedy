@@ -1,37 +1,181 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { useLocation } from 'react-router-dom';
-import {
-  FiUser,
-  FiShield,
-  FiBell,
-  FiSettings,
-  FiMonitor,
-  FiKey,
-  FiMail,
-  FiPhone,
-  FiGlobe,
-  FiMoon,
-  FiSun,
-  FiCheck,
-  FiTrendingUp,
-  FiAlertTriangle,
-  FiAlertCircle,
-  FiTarget,
-  FiDollarSign,
-  FiBarChart
+import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  FiUser, FiShield, FiBell, FiSettings, FiMonitor, FiKey, FiMail, FiPhone, 
+  FiGlobe, FiMoon, FiSun, FiCheck, FiTrendingUp, FiAlertTriangle, FiAlertCircle, 
+  FiTarget, FiDollarSign, FiBarChart, FiCamera, FiEdit2, FiChevronDown, FiLogOut
 } from 'react-icons/fi';
 import { useAuth } from '../../contexts/SupabaseAuthContext';
 import api from '../../services/api';
 
-// Composant de chargement amélioré
+// Animation pour les transitions
+const tabVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { 
+      duration: 0.3,
+      ease: 'easeInOut'
+    }
+  },
+  exit: { 
+    opacity: 0, 
+    y: -10,
+    transition: { 
+      duration: 0.2,
+      ease: 'easeInOut' 
+    }
+  }
+};
+
+// Composant de chargement amélioré avec animation
 const LoadingSpinner = () => (
-  <div className="flex flex-col items-center justify-center p-12 space-y-4">
-    <div className="animate-spin rounded-full h-14 w-14 border-4 border-purple-500 border-t-transparent"></div>
-    <p className="text-gray-500 dark:text-gray-400">Chargement des paramètres...</p>
+  <div className="flex flex-col items-center justify-center min-h-[50vh] p-12">
+    <motion.div
+      animate={{ rotate: 360 }}
+      transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+      className="w-14 h-14 rounded-full border-4 border-purple-500 border-t-transparent"
+    />
+    <motion.p 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="mt-6 text-gray-500 dark:text-gray-400 text-center"
+    >
+      Chargement de vos paramètres...
+    </motion.p>
   </div>
 );
+
+// Composant d'onglet personnalisé
+const TabButton = ({ tab, isActive, onClick }) => (
+  <motion.button
+    whileHover={{ scale: 1.02 }}
+    whileTap={{ scale: 0.98 }}
+    onClick={onClick}
+    className={`w-full flex items-center p-4 rounded-xl transition-all duration-200 ${
+      isActive
+        ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg'
+        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
+    }`}
+  >
+    <tab.icon className={`w-5 h-5 mr-3 ${isActive ? 'text-white' : 'text-purple-500'}`} />
+    <div className="text-left">
+      <div className={`font-medium ${isActive ? 'text-white' : 'text-gray-900 dark:text-white'}`}>
+        {tab.name}
+      </div>
+      <div className={`text-xs mt-0.5 ${isActive ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>
+        {tab.description}
+      </div>
+    </div>
+  </motion.button>
+);
+
+// Menu déroulant pour le profil utilisateur
+const ProfileDropdown = ({ user, onLogout }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Fermer le menu en cliquant à l'extérieur
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center space-x-2 focus:outline-none"
+      >
+        <div className="relative">
+          <img
+            src={user?.user_metadata?.avatar_url || '/default-avatar.png'}
+            alt={user?.user_metadata?.full_name || 'Utilisateur'}
+            className="w-10 h-10 rounded-full border-2 border-white dark:border-gray-700"
+          />
+          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></div>
+        </div>
+        <div className="hidden md:block text-left">
+          <p className="text-sm font-medium text-gray-900 dark:text-white">
+            {user?.user_metadata?.full_name || 'Utilisateur'}
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            {user?.email || ''}
+          </p>
+        </div>
+        <FiChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform ${isOpen ? 'transform rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl z-50 overflow-hidden border border-gray-100 dark:border-gray-700"
+          >
+            <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+              <p className="text-sm font-medium text-gray-900 dark:text-white">
+                {user?.user_metadata?.full_name || 'Utilisateur'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {user?.email || ''}
+              </p>
+            </div>
+            <div className="py-1">
+              <button
+                onClick={() => {
+                  // Rediriger vers les paramètres de profil
+                  window.location.href = '/settings?tab=profile';
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
+              >
+                <FiUser className="mr-3 w-4 h-4" />
+                Mon profil
+              </button>
+              <button
+                onClick={() => {
+                  // Rediriger vers les paramètres de sécurité
+                  window.location.href = '/settings?tab=security';
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center"
+              >
+                <FiShield className="mr-3 w-4 h-4" />
+                Sécurité
+              </button>
+            </div>
+            <div className="py-1 border-t border-gray-100 dark:border-gray-700">
+              <button
+                onClick={() => {
+                  onLogout();
+                  setIsOpen(false);
+                }}
+                className="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 flex items-center"
+              >
+                <FiLogOut className="mr-3 w-4 h-4" />
+                Déconnexion
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
+
 
 // Onglets de paramètres
 const tabs = [
@@ -43,81 +187,147 @@ const tabs = [
 ];
 
 const SettingsPage = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('profile');
   const [isLoading, setIsLoading] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   // Gérer les paramètres d'URL pour les onglets
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
     const tabParam = urlParams.get('tab');
-    if (tabParam && ['profile', 'investment', 'security', 'notifications', 'preferences'].includes(tabParam)) {
+    if (tabParam && tabs.some(tab => tab.id === tabParam)) {
       setActiveTab(tabParam);
     }
   }, [location.search]);
+
+  // Gestion du défilement pour l'effet de l'en-tête
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Erreur lors de la déconnexion:', error);
+    }
+  };
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
 
   return (
-    <div className="w-full h-full overflow-auto p-0 m-0 bg-gray-50 dark:bg-gray-900">
-      <div className="w-full max-w-7xl mx-auto p-4 sm:p-6">
-        {/* En-tête */}
-        <div className="mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">Paramètres</h1>
-          <p className="mt-1 text-base sm:text-lg text-gray-600 dark:text-gray-300">
-            Gérez vos paramètres personnels et de sécurité
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+      {/* En-tête fixe */}
+      <header className={`sticky top-0 z-40 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-700/50 transition-shadow duration-300 ${
+        isScrolled ? 'shadow-sm' : ''
+      }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 mr-4"
+              >
+                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+              </button>
+              <h1 className="text-xl font-bold text-gray-900 dark:text-white">Paramètres</h1>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <ProfileDropdown user={user} onLogout={handleLogout} />
+            </div>
+          </div>
         </div>
+      </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Navigation latérale */}
-          <div className="lg:col-span-1">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-4 sm:p-6">
-                <nav className="space-y-2">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 ${
-                        activeTab === tab.id
-                          ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                          : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50'
-                      }`}
-                    >
-                      <tab.icon className={`w-5 h-5 mr-3 ${activeTab === tab.id ? 'text-white' : ''}`} />
-                      <div>
-                        <div className={`font-medium ${activeTab === tab.id ? 'text-white' : ''}`}>
-                          {tab.name}
-                        </div>
-                        <div className={`text-xs mt-0.5 ${activeTab === tab.id ? 'text-white/80' : 'text-gray-500 dark:text-gray-400'}`}>
-                          {tab.description}
-                        </div>
-                      </div>
+          <div className="lg:col-span-3 space-y-4">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {/* Carte de profil */}
+              <div className="p-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
+                <div className="flex items-center space-x-4">
+                  <div className="relative">
+                    <img
+                      src={user?.user_metadata?.avatar_url || '/default-avatar.png'}
+                      alt={user?.user_metadata?.full_name || 'Utilisateur'}
+                      className="w-16 h-16 rounded-full border-2 border-white/80"
+                    />
+                    <button className="absolute -bottom-1 -right-1 bg-white p-1.5 rounded-full shadow-md text-purple-600 hover:bg-purple-50 transition-colors">
+                      <FiCamera className="w-4 h-4" />
                     </button>
-                  ))}
-                </nav>
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold">{user?.user_metadata?.full_name || 'Utilisateur'}</h2>
+                    <p className="text-sm text-white/80">{user?.email || ''}</p>
+                  </div>
+                </div>
               </div>
+              
+              {/* Navigation */}
+              <nav className="p-4 space-y-1">
+                {tabs.map((tab) => (
+                  <TabButton
+                    key={tab.id}
+                    tab={tab}
+                    isActive={activeTab === tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                  />
+                ))}
+              </nav>
+            </div>
+
+            {/* Carte d'aide */}
+            <div className="bg-gradient-to-br from-indigo-50 to-blue-50 dark:from-indigo-900/20 dark:to-blue-900/20 rounded-2xl p-6 border border-indigo-100 dark:border-indigo-900/30">
+              <div className="text-indigo-600 dark:text-indigo-400 mb-3">
+                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Besoin d'aide ?</h3>
+              <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">Notre équipe est là pour vous aider avec vos paramètres et préférences.</p>
+              <button className="w-full bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-indigo-600 dark:text-indigo-400 font-medium py-2 px-4 rounded-lg border border-indigo-200 dark:border-indigo-800 transition-colors">
+                Contacter le support
+              </button>
             </div>
           </div>
 
           {/* Contenu principal */}
-          <div className="lg:col-span-3">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-              <div className="p-4 sm:p-6">
-                {activeTab === 'profile' && <ProfileSettings />}
-                {activeTab === 'investment' && <InvestmentSettings />}
-                {activeTab === 'security' && <SecuritySettings />}
-                {activeTab === 'notifications' && <NotificationSettings />}
-                {activeTab === 'preferences' && <PreferenceSettings />}
-              </div>
-            </div>
+          <div className="lg:col-span-9">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={tabVariants}
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden"
+              >
+                <div className="p-6 sm:p-8">
+                  {activeTab === 'profile' && <ProfileSettings user={user} />}
+                  {activeTab === 'investment' && <InvestmentSettings />}
+                  {activeTab === 'security' && <SecuritySettings />}
+                  {activeTab === 'notifications' && <NotificationSettings />}
+                  {activeTab === 'preferences' && <PreferenceSettings />}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
@@ -423,95 +633,270 @@ const InvestmentSettings = () => {
     </div>
   );
 };
-const ProfileSettings = () => {
-  const { user } = useAuth();
-  const [formData, setFormData] = useState({
-    firstName: user?.firstName || '',
-    lastName: user?.lastName || '',
-    email: user?.email || '',
-    phone: user?.phone || '',
+const ProfileSettings = ({ user }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const fileInputRef = useRef(null);
+  
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({
+    defaultValues: {
+      fullName: user?.user_metadata?.full_name || '',
+      email: user?.email || '',
+      phone: user?.phone || '',
+      country: user?.user_metadata?.country || 'FR',
+      bio: user?.user_metadata?.bio || '',
+    }
   });
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  // Gestion du changement de photo de profil
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreviewImage(reader.result);
+      };
+      reader.readAsDataURL(file);
+      // Ici, vous pourriez ajouter la logique pour télécharger l'image
+    }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    // Logique de sauvegarde
-    console.log('Sauvegarde profil:', formData);
+  const triggerFileInput = () => {
+    fileInputRef.current.click();
+  };
+
+  const onSubmit = async (data) => {
+    try {
+      setIsUploading(true);
+      // Ici, vous ajouterez la logique pour mettre à jour le profil
+      // Exemple : await api.updateProfile(user.id, data);
+      
+      // Si vous avez une fonction pour rafraîchir les données utilisateur, appelez-la ici
+      // await refreshUserData();
+      
+      setIsEditing(false);
+      toast.success('Profil mis à jour avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour du profil:', error);
+      toast.error('Une erreur est survenue lors de la mise à jour du profil');
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">Informations personnelles</h2>
-        <p className="text-gray-600 dark:text-gray-300">Mettez à jour vos informations de profil</p>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Profil Utilisateur</h2>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            Gérez vos informations personnelles et vos préférences
+          </p>
+        </div>
+        <div className="mt-4 sm:mt-0 flex space-x-3">
+          {isEditing ? (
+            <>
+              <button
+                type="button"
+                onClick={() => {
+                  reset();
+                  setIsEditing(false);
+                  setPreviewImage(null);
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+                disabled={isUploading}
+              >
+                Annuler
+              </button>
+              <button
+                type="submit"
+                form="profile-form"
+                className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 flex items-center"
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Enregistrement...
+                  </>
+                ) : 'Enregistrer les modifications'}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsEditing(true)}
+              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 flex items-center"
+            >
+              <FiEdit2 className="mr-2 w-4 h-4" />
+              Modifier le profil
+            </button>
+          )}
+        </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Prénom
-            </label>
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
+      <form id="profile-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        {/* Section Photo de profil */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Photo de profil</h3>
+          <div className="flex flex-col sm:flex-row items-center sm:space-x-6">
+            <div className="relative mb-4 sm:mb-0">
+              <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-100 dark:bg-gray-700">
+                <img
+                  src={previewImage || user?.user_metadata?.avatar_url || '/default-avatar.png'}
+                  alt={user?.user_metadata?.full_name || 'Utilisateur'}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {isEditing && (
+                <>
+                  <button
+                    type="button"
+                    onClick={triggerFileInput}
+                    className="absolute -bottom-2 -right-2 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md border border-gray-200 dark:border-gray-600 text-purple-600 dark:text-purple-400 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  >
+                    <FiCamera className="w-5 h-5" />
+                  </button>
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImageChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                </>
+              )}
+            </div>
+            <div className="text-center sm:text-left">
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {isEditing 
+                  ? 'Formats supportés : JPG, PNG, GIF. Taille maximale : 5 Mo' 
+                  : 'Cliquez sur "Modifier le profil" pour changer votre photo'}
+              </p>
+            </div>
           </div>
+        </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Nom
-            </label>
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-            />
+        {/* Section Informations personnelles */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+          <div className="px-6 py-5 border-b border-gray-200 dark:border-gray-700">
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">Informations personnelles</h3>
+            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+              Ces informations seront visibles par les autres utilisateurs.
+            </p>
           </div>
-        </div>
+          <div className="p-6 space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Nom complet <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="fullName"
+                  {...register('fullName', { required: 'Ce champ est requis' })}
+                  disabled={!isEditing}
+                  className={`w-full px-4 py-2.5 rounded-lg border ${
+                    errors.fullName 
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-purple-500 focus:border-purple-500'
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-colors ${!isEditing ? 'bg-gray-50 dark:bg-gray-700/50' : ''}`}
+                  placeholder="Votre nom complet"
+                />
+                {errors.fullName && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.fullName.message}</p>
+                )}
+              </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-        </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Adresse email <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  {...register('email', { 
+                    required: 'Ce champ est requis',
+                    pattern: {
+                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                      message: 'Adresse email invalide'
+                    }
+                  })}
+                  disabled={!isEditing}
+                  className={`w-full px-4 py-2.5 rounded-lg border ${
+                    errors.email 
+                      ? 'border-red-300 focus:ring-red-500 focus:border-red-500' 
+                      : 'border-gray-300 dark:border-gray-600 focus:ring-purple-500 focus:border-purple-500'
+                  } bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-opacity-50 transition-colors ${!isEditing ? 'bg-gray-50 dark:bg-gray-700/50' : ''}`}
+                  placeholder="votre@email.com"
+                />
+                {errors.email && (
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
+                )}
+              </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Téléphone
-          </label>
-          <input
-            type="tel"
-            name="phone"
-            value={formData.phone}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-          />
-        </div>
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Téléphone
+                </label>
+                <div className="relative">
+                  <input
+                    type="tel"
+                    id="phone"
+                    {...register('phone')}
+                    disabled={!isEditing}
+                    className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 focus:border-transparent transition-colors disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-700/50"
+                    placeholder="+33 6 12 34 56 78"
+                  />
+                </div>
+              </div>
 
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            className="px-6 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:opacity-90 focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all duration-200"
-          >
-            Sauvegarder les modifications
-          </button>
+              <div>
+                <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Pays
+                </label>
+                <select
+                  id="country"
+                  {...register('country')}
+                  disabled={!isEditing}
+                  className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 focus:border-transparent transition-colors disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-700/50"
+                >
+                  <option value="FR">France</option>
+                  <option value="BE">Belgique</option>
+                  <option value="CH">Suisse</option>
+                  <option value="LU">Luxembourg</option>
+                  <option value="CA">Canada</option>
+                  <option value="MA">Maroc</option>
+                  <option value="TN">Tunisie</option>
+                  <option value="DZ">Algérie</option>
+                  <option value="SN">Sénégal</option>
+                  <option value="CI">Côte d'Ivoire</option>
+                  <option value="OTHER">Autre</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                À propos de moi
+              </label>
+              <textarea
+                id="bio"
+                {...register('bio')}
+                disabled={!isEditing}
+                rows={3}
+                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 focus:border-transparent transition-colors disabled:opacity-50 disabled:bg-gray-50 dark:disabled:bg-gray-700/50"
+                placeholder="Décrivez-vous en quelques mots..."
+              />
+              <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Décrivez-vous brièvement (optionnel)
+              </p>
+            </div>
+          </div>
         </div>
       </form>
     </div>

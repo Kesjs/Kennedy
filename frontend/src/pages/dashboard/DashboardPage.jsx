@@ -13,6 +13,51 @@ const LoadingSpinner = () => (
   </div>
 );
 
+// Composant de carte d'étape
+const StepCard = React.memo(({ icon, step, title, description, color, onClick, buttonText }) => {
+  const colors = {
+    purple: {
+      bg: 'bg-purple-500/10',
+      text: 'text-purple-400',
+      border: 'hover:border-purple-500/30',
+      button: 'text-purple-400 hover:text-purple-300'
+    },
+    blue: {
+      bg: 'bg-blue-500/10',
+      text: 'text-blue-400',
+      border: 'hover:border-blue-500/30',
+      button: 'text-blue-400 hover:text-blue-300'
+    },
+    green: {
+      bg: 'bg-green-500/10',
+      text: 'text-green-400',
+      border: 'hover:border-green-500/30',
+      button: 'text-green-400 hover:text-green-300'
+    }
+  };
+
+  return (
+    <div className={`bg-white/5 rounded-xl p-5 border border-white/5 hover:shadow-lg transition-all h-full flex flex-col ${colors[color].border}`}>
+      <div className="flex items-center mb-4">
+        <div className={`flex-shrink-0 h-10 w-10 rounded-full ${colors[color].bg} flex items-center justify-center ${colors[color].text} mr-3`}>
+          {icon}
+        </div>
+        <span className={`text-sm font-semibold ${colors[color].text} bg-opacity-20 px-3 py-1 rounded-full`}>
+          Étape {step}
+        </span>
+      </div>
+      <h4 className="text-lg font-semibold text-white mb-2">{title}</h4>
+      <p className="text-sm text-gray-300 mb-4 flex-grow">{description}</p>
+      <button 
+        onClick={onClick}
+        className={`text-sm ${colors[color].button} flex items-center group self-start`}
+      >
+        {buttonText} <FiArrowRight className="ml-1.5 group-hover:translate-x-1 transition-transform" />
+      </button>
+    </div>
+  );
+});
+
 // Composant de carte de statistique amélioré avec daisyUI
 const StatCard = React.memo(({ title, value, icon: Icon, color = 'primary', change, suffix = '' }) => {
   const colors = {
@@ -361,83 +406,75 @@ const DashboardPage = () => {
   // Afficher un message de bienvenue pour les nouveaux utilisateurs
   if (isNewUser && !loading && !error) {
     return (
-      <div className="w-full p-4 max-w-4xl mx-auto">
-        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl shadow-2xl overflow-hidden">
-          <div className="p-8 md:p-12">
-            <div className="flex flex-col md:flex-row items-center">
-              <div className="md:w-1/2 mb-8 md:mb-0 md:pr-8">
-                <div className="w-32 h-32 mx-auto md:mx-0 bg-gradient-to-br from-purple-600/20 to-blue-500/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/10 mb-6">
-                  <FiTrendingUp className="w-16 h-16 text-purple-400" />
-                </div>
-                <button
-                  onClick={() => navigate('/invest')}
-                  className="px-6 py-3 bg-white/10 text-white rounded-lg font-medium text-sm flex items-center justify-center border border-white/20 hover:bg-white/20 transition-colors">
-                  <FiInfo className="mr-2" /> En savoir plus
-                </button>
-              </div>
-              <div className="md:w-1/2 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                <h3 className="text-lg font-semibold text-white mb-4">Comment commencer ?</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 mr-3 mt-0.5">
-                      <span className="font-bold">1</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-white">Effectuez un dépôt</h4>
-                      <p className="text-sm text-gray-300">Créez votre premier portefeuille en ajoutant des fonds.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 mr-3 mt-0.5">
-                      <span className="font-bold">2</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-white">Choisissez un investissement</h4>
-                      <p className="text-sm text-gray-300">Sélectionnez parmi nos options d'investissement.</p>
-                    </div>
-                  </div>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 mr-3 mt-0.5">
-                      <span className="font-bold">3</span>
-                    </div>
-                    <div>
-                      <h4 className="font-medium text-white">Suivez vos performances</h4>
-                      <p className="text-sm text-gray-300">Visualisez la croissance de votre portefeuille.</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+      <div className="w-full p-4">
+        <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-2xl p-6 md:p-8 max-w-7xl mx-auto">
+          {/* En-tête */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
+            <div className="mb-4 md:mb-0">
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">Bienvenue sur Gazoduc Invest</h2>
+              <p className="text-purple-100/80">Commencez à investir en 3 étapes simples</p>
             </div>
-            <div className="md:w-1/2 bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-              <h3 className="text-lg font-semibold text-white mb-4">Comment commencer ?</h3>
-              <div className="space-y-4">
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-purple-500/20 flex items-center justify-center text-purple-400 mr-3 mt-0.5">
-                    <span className="font-bold">1</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-white">Effectuez un dépôt</h4>
-                    <p className="text-sm text-gray-300">Créez votre premier portefeuille en ajoutant des fonds.</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-blue-500/20 flex items-center justify-center text-blue-400 mr-3 mt-0.5">
-                    <span className="font-bold">2</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-white">Choisissez un investissement</h4>
-                    <p className="text-sm text-gray-300">Sélectionnez parmi nos options d'investissement.</p>
-                  </div>
-                </div>
-                <div className="flex items-start">
-                  <div className="flex-shrink-0 h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center text-green-400 mr-3 mt-0.5">
-                    <span className="font-bold">3</span>
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-white">Suivez vos performances</h4>
-                    <p className="text-sm text-gray-300">Visualisez la croissance de votre portefeuille.</p>
-                  </div>
-                </div>
+            <button 
+              onClick={() => navigate('/deposit')}
+              className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium flex items-center hover:opacity-90 transition-all"
+            >
+              <FiPlus className="mr-2" /> Faire un dépôt
+            </button>
+          </div>
+          
+          {/* Étapes */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <StepCard 
+              icon={<FiDownload className="w-5 h-5" />}
+              step={1}
+              title="Effectuez un dépôt"
+              description="Créez votre premier portefeuille en ajoutant des fonds via notre système sécurisé."
+              color="purple"
+              onClick={() => navigate('/deposit')}
+              buttonText="Dépôt rapide"
+            />
+            
+            <StepCard 
+              icon={<FiTrendingUp className="w-5 h-5" />}
+              step={2}
+              title="Choisissez un investissement"
+              description="Parcourez nos plans d'investissement et sélectionnez celui qui correspond à vos objectifs."
+              color="blue"
+              onClick={() => navigate('/invest')}
+              buttonText="Voir les offres"
+            />
+            
+            <StepCard 
+              icon={<FiPieChart className="w-5 h-5" />}
+              step={3}
+              title="Suivez vos performances"
+              description="Visualisez en temps réel la croissance de votre portefeuille et vos bénéfices."
+              color="green"
+              onClick={() => navigate('/dashboard')}
+              buttonText="Tableau de bord"
+            />
+          </div>
+          
+          {/* Aide */}
+          <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+            <div className="flex flex-col sm:flex-row items-center justify-between">
+              <div className="flex items-center mb-3 sm:mb-0">
+                <FiInfo className="text-yellow-400 mr-2" />
+                <span className="text-sm text-gray-300">Besoin d'aide pour commencer ?</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <button 
+                  onClick={() => navigate('/support')}
+                  className="px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white transition-colors"
+                >
+                  Contacter le support
+                </button>
+                <button 
+                  onClick={() => navigate('/faq')}
+                  className="px-4 py-2 text-sm bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white transition-colors"
+                >
+                  Voir la FAQ
+                </button>
               </div>
             </div>
           </div>
