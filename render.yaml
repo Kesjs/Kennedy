@@ -13,7 +13,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
+        value: 5001
       - key: JWT_SECRET
         value: FAhLpx6ubTWkpaRVLHIKPZRZaOKh+UJnp66cXiQ3sQKVbTBNRrf8Df27AO4y/PpTzb4XHhOYWzePzLaHwiAceQ==
       - key: JWT_EXPIRES_IN
