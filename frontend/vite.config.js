@@ -52,7 +52,7 @@ export default defineConfig({
       },
     },
     assetsInlineLimit: 0,
-    chunkSizeWarningLimit: 1000,
+    chunkSizeWarningLimit: 1000
   },
   
   optimizeDeps: {
