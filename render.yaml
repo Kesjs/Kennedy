@@ -36,8 +36,9 @@ services:
     buildCommand: |
       cd frontend && \
       npm install && \
-      npm run build
-    staticPublishPath: "./frontend/dist"
+      npm run build && \
+      mv dist ../dist
+    staticPublishPath: "./dist"
     envVars:
       - key: NODE_ENV
         value: production
